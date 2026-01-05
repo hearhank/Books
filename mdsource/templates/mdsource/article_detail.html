@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>{{ article.title }}</title>
+    <link rel="stylesheet" href="{% static 'mdsource/css/style.css' %}">
+    <!-- 添加代码高亮样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <!-- 添加 KaTeX 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+    <style>
+        /* 页面基础样式 */
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* 文章标题和元信息样式 */
+        .article-header {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .article-header h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+        
+        .article-meta {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .article-meta a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .article-meta a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 导航按钮样式 */
+        .article-nav {
+            max-width: 800px;
+            margin: 30px auto;
+            text-align: center;
+        }
+        
+        .article-nav a {
+            margin: 0 10px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .article-nav a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Markdown 渲染区域样式 */
+        .markdown-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e1e4e8;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+        
+        /* Markdown 内容样式 */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #333;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .markdown-content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            list-style-type: disc !important;
+        }
+        
+        .markdown-content ol {
+            list-style-type: decimal !important;
+        }
+        
+        .markdown-content ul ul {
+            list-style-type: circle !important;
+            margin-bottom: 0;
+        }
+        
+        .markdown-content ul ul ul {
+            list-style-type: square !important;
+            margin-bottom: 0;
+        }
+        
+        .markdown-content li {
+            margin-bottom: 5px;
+            background-color: transparent !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        
+        .markdown-content a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        
+        .markdown-content a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 代码块样式 */
+        .markdown-content code {
+            background-color: #f6f8fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .markdown-content pre {
+            background-color: #f6f8fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border: 1px solid #e1e4e8;
+        }
+        
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+            display: block;
+            line-height: 1.5;
+        }
+        
+        /* 代码高亮样式 */
+        .markdown-content .highlight {
+            background-color: #f6f8fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        
+        .markdown-content .highlight pre {
+            margin: 0;
+            border: none;
+            background-color: transparent;
+        }
+        
+        .markdown-content .codehilite {
+            background-color: #f6f8fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        
+        .markdown-content .codehilite pre {
+            margin: 0;
+            border: none;
+            background-color: transparent;
+        }
+        
+        /* 引用样式 */
+        .markdown-content blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 15px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        /* 图片样式 */
+        .markdown-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 15px 0;
+        }
+        
+        /* 表格样式 */
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .markdown-content table th, .markdown-content table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .markdown-content table th {
+            background-color: #f8f9fa;
+        }
+        
+        /* 数学公式样式 */
+        .markdown-content .math {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        
+        /* 代码块样式优化 */
+        .markdown-content pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+        }
+        
+        .markdown-content pre code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="article-header">
+        <h1>{{ article.title }}</h1>
+        <div class="article-meta">
+            <p>所属书籍: <a href="{% url 'book_detail' article.book.id %}">{{ article.book.title }}</a></p>
+            <p>发布日期: {{ article.pub_date }}</p>
+        </div>
+        <hr>
+    </div>
+    
+    <!-- Markdown 渲染区域 -->
+    <div class="markdown-content">
+        <!-- 直接显示后端渲染的 Markdown 内容 -->
+        {{ article.get_markdown_content|safe }}
+    </div>
+    
+    <div class="article-nav">
+        <a href="{% url 'article_list' %}">返回文章列表</a> | 
+        <a href="{% url 'index' %}">查看所有书籍</a>
+    </div>
+    
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    <!-- 添加必要的 JavaScript 库 -->
+    <!-- 添加 highlight.js 支持代码高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- 添加 KaTeX 支持 LaTeX 数学公式渲染 -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+    <!-- 添加 flowchart.js 支持流程图渲染 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.17.1/flowchart.min.js"></script>
+    
+    <script>
+        // 初始化代码高亮和处理各种代码块
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // 处理 flow/flowchart 代码块，转换为流程图
+            document.querySelectorAll('pre code.language-flow, pre code.language-flowchart').forEach((block) => {
+                // 获取 flow 代码内容
+                const flowContent = block.textContent;
+                
+                // 创建一个新的 div 元素，用于显示流程图
+                const flowDiv = document.createElement('div');
+                flowDiv.className = 'flowchart-container';
+                flowDiv.style.margin = '20px 0';
+                flowDiv.style.textAlign = 'center';
+                flowDiv.style.overflowX = 'auto';
+                
+                // 创建一个 canvas 元素，用于绘制流程图
+                const canvas = document.createElement('div');
+                canvas.id = `flowchart-${Math.floor(Math.random() * 1000)}`;
+                flowDiv.appendChild(canvas);
+                
+                // 替换原来的代码块
+                block.parentElement.replaceChild(flowDiv, block);
+                
+                // 使用 flowchart.js 渲染流程图
+                try {
+                    const diagram = flowchart.parse(flowContent);
+                    diagram.drawSVG(canvas.id, {
+                        'yes-text': 'yes',
+                        'no-text': 'no',
+                        'arrow-end': 'block',
+                        'font-size': 14,
+                        'font': 'Arial',
+                        'fill': 'white',
+                        'fill-opacity': 0,
+                        'stroke': 'black',
+                        'stroke-width': 1,
+                        'curve': 'basis'
+                    });
+                } catch (error) {
+                    console.error('Flowchart rendering error:', error);
+                    // 如果渲染失败，显示原始代码
+                    canvas.textContent = 'Flowchart rendering failed: ' + error.message;
+                }
+            });
+            
+            // 处理 language-latex 代码块，转换为数学公式
+            document.querySelectorAll('pre code.language-latex, pre code.language-math, pre code.language-mathjax').forEach((block) => {
+                // 获取 LaTeX 代码内容
+                const latexContent = block.textContent;
+                
+                // 创建一个新的 div 元素，用于显示数学公式
+                const latexDiv = document.createElement('div');
+                latexDiv.className = 'editormd-tex';
+                latexDiv.style.margin = '20px 0';
+                latexDiv.style.textAlign = 'center';
+                
+                // 创建一个 span 元素，用于包裹 KaTeX 公式
+                const katexSpan = document.createElement('span');
+                katexSpan.className = 'katex';
+                katexSpan.style.fontSize = '1.6em';
+                
+                // 使用 KaTeX 渲染 LaTeX 公式
+                try {
+                    katex.render(latexContent, katexSpan, {
+                        throwOnError: false,
+                        displayMode: true,
+                        output: 'html'
+                    });
+                    
+                    // 将 span 元素添加到 div 中
+                    latexDiv.appendChild(katexSpan);
+                    
+                    // 替换原来的代码块
+                    block.parentElement.replaceChild(latexDiv, block);
+                } catch (error) {
+                    console.error('KaTeX rendering error:', error);
+                    // 如果渲染失败，显示原始代码
+                    latexDiv.textContent = 'LaTeX rendering failed: ' + error.message;
+                }
+            });
+            
+            // 高亮所有其他代码块
+            document.querySelectorAll('pre code:not(.language-flow):not(.language-flowchart):not(.language-latex):not(.language-math):not(.language-mathjax)').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+            
+            // 自动渲染页面中的所有 LaTeX 公式
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\(", right: "\)", display: false},
+                    {left: "\[", right: "\]", display: true}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>

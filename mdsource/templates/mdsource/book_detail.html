@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>{{ book.title }}</title>
+    <link rel="stylesheet" href="{% static 'mdsource/css/style.css' %}">
+    <!-- 添加代码高亮样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <!-- 添加 KaTeX 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+    <style>
+        /* 页面基础样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .markdown-content li{
+            border-radius: 5px;
+            padding: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 0px 0px rgba(0, 0, 0, 0.1);
+        }
+        /* 书籍信息头部 */
+        .book-header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .book-cover-column {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .book-cover-image {
+            max-width: 200px;
+            max-height: 300px;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .book-info-column {
+            flex: 1;
+        }
+        
+        .book-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .book-title {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .book-nav-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+        
+        .book-meta {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .book-description {
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+        
+        /* 双栏布局 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        /* 左侧文章列表 */
+        .article-sidebar {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            height: calc(100vh - 180px);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .sidebar-header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .article-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            height: calc(100% - 50px);
+        }
+        
+        .article-list-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .article-list-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .article-list-item.active {
+            background-color: #e3f2fd;
+            border-left: 4px solid #3498db;
+        }
+        
+        .article-list-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .article-list-meta {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        /* 右侧文章内容 */
+        .article-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .article-content-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .article-content-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .article-content-meta {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .article-detail-link {
+            margin-bottom: 15px;
+        }
+        
+        .article-detail-link a {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+        
+        .article-detail-link a:hover {
+            background-color: #2980b9;
+        }
+        
+        .markdown-content {
+            margin-bottom: 30px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* 自定义滚动条样式 */
+        .markdown-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .markdown-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .markdown-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .markdown-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Markdown 内容样式 */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #333;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .markdown-content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            list-style-type: disc !important;
+        }
+        
+        .markdown-content ol {
+            list-style-type: decimal !important;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin: 20px 0;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .markdown-content table th, .markdown-content table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .markdown-content table th {
+            background-color: #f8f9fa;
+        }
+        
+        /* 数学公式样式 */
+        .markdown-content .math {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        
+        /* 代码块样式优化 */
+        .markdown-content pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+        }
+        
+        .markdown-content pre code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .page-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .page-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .page-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .article-sidebar {
+                height: auto;
+                position: static;
+            }
+            
+            .article-list {
+                height: 300px;
+            }
+        }
+        
+        /* 导航链接 */
+        .nav-links {
+            font-size: 1em;
+        }
+        
+        .nav-links a {
+            margin: 0 10px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 切换发布状态按钮 */
+        .toggle-published-btn {
+            margin: 10px 0;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .toggle-published-btn[data-is-published="True"] {
+            background-color: #27ae60;
+        }
+        
+        .toggle-published-btn[data-is-published="False"] {
+            background-color: #e74c3c;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+        
+        /* 代码块样式 */
+        .markdown-content pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            margin-bottom: 15px;
+        }
+        
+        .markdown-content pre code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* 表格样式 */
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .markdown-content table th, .markdown-content table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .markdown-content table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- 书籍信息头部 -->
+        <div class="book-header">
+            <!-- 第一列：书籍封面图片 -->
+            {% if book.cover_image %}
+            <div class="book-cover-column">
+                <img src="{{ book.cover_image.url }}" alt="{{ book.title }}封面" class="book-cover-image">
+            </div>
+            {% endif %}
+            
+            <!-- 第二列：书籍信息 -->
+            <div class="book-info-column">
+                <div class="book-title-row">
+                    <h1 class="book-title">{{ book.title }}</h1>
+                </div>
+                <div class="book-meta">
+                    <p>作者: {{ book.author }} | 发布日期: {{ book.pub_date|date:"Y-m-d H:i:s" }}</p>
+                </div>
+                {% if book.description %}
+                <div class="book-description">
+                    <h3>书籍简介</h3>
+                    <p>{{ book.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- 第三列：导航菜单 -->
+            <div class="book-nav-column">
+                <div class="nav-links">
+                    <a href="/admins/?module=books">返回书籍列表</a>
+                    <br>
+                    <a href="/articles/create/?book_id={{ book.id }}" class="btn-add-article">添加文章</a>
+                    <br>
+                    <a href="{% url 'article_list' %}">查看所有文章</a>
+                    <br>
+                    <!-- <button id="toggle-published-btn" class="toggle-published-btn" 
+                            data-book-id="{{ book.id }}" data-is-published="{{ book.is_published }}">
+                        {% if book.is_published %}已发布{% else %}未发布{% endif %}
+                    </button> -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 左侧文章列表 -->
+            <aside class="article-sidebar">
+                <div class="sidebar-header">文章列表</div>
+                <ul class="article-list">
+                    {% for article in articles %}
+                    <li class="article-list-item" data-article-id="{{ article.id }}" data-article-url="{% url 'article_detail' article.id %}">
+                        <div class="article-list-title">
+                            <!-- <a href="{% url 'article_detail' article.id %}" target="_blank" style="text-decoration: none; color: inherit;"> -->
+                                {{ article.title }}
+                            <!-- </a> -->
+                        </div>
+                        <div class="article-list-meta">发布日期: {{ article.pub_date|date:"Y-m-d H:i:s" }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="article-list-item">暂无章节</li>
+                    {% endfor %}
+                </ul>
+            </aside>
+            
+            <!-- 右侧文章内容 -->
+            <main class="article-content">
+                <div id="article-content-container">
+                    <!-- 文章内容将通过JavaScript动态加载 -->
+                    <div class="loading">请选择一篇文章查看内容</div>
+                </div>
+            </main>
+        </div>
+        
+
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有文章列表项
+            const articleItems = document.querySelectorAll('.article-list-item');
+            const contentContainer = document.getElementById('article-content-container');
+            
+            // 默认显示第一篇文章内容
+            if (articleItems.length > 0) {
+                const firstArticle = articleItems[0];
+                loadArticleContent(firstArticle.dataset.articleId, firstArticle);
+            }
+            
+            // 为所有文章列表项添加点击事件
+            articleItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    loadArticleContent(this.dataset.articleId, this);
+                });
+            });
+            
+            // 为所有文章标题链接添加点击事件，阻止事件冒泡
+            // const articleLinks = document.querySelectorAll('.article-list-item a');
+            // articleLinks.forEach(link => {
+            //     link.addEventListener('click', function(event) {
+            //         // 阻止事件冒泡，防止触发列表项的点击事件
+            //         event.stopPropagation();
+            //     });
+            // });
+
+            // 初始化切换发布状态按钮
+            // initTogglePublishedButton();
+        });
+        
+        // // 获取CSRF令牌
+        // function getCookie(name) {
+        //     let cookieValue = null;
+        //     if (document.cookie && document.cookie !== '') {
+        //         const cookies = document.cookie.split(';');
+        //         for (let i = 0; i < cookies.length; i++) {
+        //             const cookie = cookies[i].trim();
+        //             // Does this cookie string begin with the name we want?
+        //             if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        //                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        //                 break;
+        //             }
+        //         }
+        //     }
+        //     return cookieValue;
+        // }
+
+        // 加载文章内容
+        function loadArticleContent(articleId, activeItem) {
+            const contentContainer = document.getElementById('article-content-container');
+            
+            // 移除所有列表项的active类
+            document.querySelectorAll('.article-list-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 添加当前列表项的active类
+            activeItem.classList.add('active');
+            
+            // 显示加载状态
+            contentContainer.innerHTML = '<div class="loading">加载中...</div>';
+            
+            // 使用AJAX请求获取文章内容
+            fetch(`/articles/${articleId}/content/`) // 使用文章内容的API端点
+                .then(response => response.json())
+                .then(data => {
+                    // 创建文章内容的HTML结构
+                    const articleHtml = `
+                        <div class="article-content-header">
+                            <a href="/articles/${data.id}/" target="_blank"><h2 class="article-content-title">${data.title}</h2></a>
+                            <div class="article-content-meta">
+                                <p>发布日期: ${new Date(data.pub_date).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="markdown-content">
+                            ${data.content}
+                        </div>
+                    `;
+                    
+                    // 更新内容容器
+                    contentContainer.innerHTML = articleHtml;
+                    
+                    // 重新渲染Markdown内容（流程图、公式、代码高亮等）
+                    renderMarkdownContent();
+                })
+                .catch(error => {
+                    console.error('加载文章内容失败:', error);
+                    contentContainer.innerHTML = '<div class="loading">加载失败，请重试</div>';
+                });
+        }
+
+        // // 切换书籍发布状态
+        // function initTogglePublishedButton() {
+        //     const toggleBtn = document.getElementById('toggle-published-btn');
+        //     if (toggleBtn) {
+        //         toggleBtn.addEventListener('click', function() {
+        //             const bookId = this.dataset.bookId;
+        //             fetch(`/books/${bookId}/toggle-published/`, {
+        //                 method: 'POST',
+        //                 headers: {
+        //                     'X-CSRFToken': getCookie('csrftoken'),
+        //                     'Content-Type': 'application/json'
+        //                 },
+        //                 body: JSON.stringify({})
+        //             })
+        //             .then(response => response.json())
+        //             .then(data => {
+        //                 if (data.success) {
+        //                     this.textContent = data.status_text;
+        //                     this.dataset.is_published = data.is_published;
+        //                     // 更新按钮样式
+        //                     this.style.backgroundColor = data.is_published ? '#27ae60' : '#e74c3c';
+        //                 }
+        //             })
+        //             .catch(error => {
+        //                 console.error('切换发布状态失败:', error);
+        //             });
+        //         });
+        //     }
+        // }
+    </script>
+    
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    
+    <!-- 添加必要的 JavaScript 库 -->
+    <!-- 添加 highlight.js 支持代码高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- 添加 KaTeX 支持 LaTeX 数学公式渲染 -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+    <!-- 添加 flowchart.js 支持流程图渲染 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.17.1/flowchart.min.js"></script>
+    
+    <script>
+        // 渲染Markdown内容（流程图、公式、代码高亮等）
+        function renderMarkdownContent() {
+            // 处理 flow/flowchart 代码块，转换为流程图
+            document.querySelectorAll('.markdown-content pre code.language-flow, .markdown-content pre code.language-flowchart').forEach((block) => {
+                // 获取 flow 代码内容
+                const flowContent = block.textContent;
+                
+                // 创建一个新的 div 元素，用于显示流程图
+                const flowDiv = document.createElement('div');
+                flowDiv.className = 'flowchart-container';
+                flowDiv.style.margin = '20px 0';
+                flowDiv.style.textAlign = 'center';
+                flowDiv.style.overflowX = 'auto';
+                
+                // 创建一个 canvas 元素，用于绘制流程图
+                const canvas = document.createElement('div');
+                canvas.id = `flowchart-${Math.floor(Math.random() * 1000)}`;
+                flowDiv.appendChild(canvas);
+                
+                // 替换原来的代码块
+                block.parentElement.replaceChild(flowDiv, block);
+                
+                // 使用 flowchart.js 渲染流程图
+                try {
+                    const diagram = flowchart.parse(flowContent);
+                    diagram.drawSVG(canvas.id, {
+                        'yes-text': 'yes',
+                        'no-text': 'no',
+                        'arrow-end': 'block',
+                        'font-size': 14,
+                        'font': 'Arial',
+                        'fill': 'white',
+                        'fill-opacity': 0,
+                        'stroke': 'black',
+                        'stroke-width': 1,
+                        'curve': 'basis'
+                    });
+                } catch (error) {
+                    console.error('Flowchart rendering error:', error);
+                    // 如果渲染失败，显示原始代码
+                    canvas.textContent = 'Flowchart rendering failed: ' + error.message;
+                }
+            });
+            
+            // 处理 language-latex 代码块，转换为数学公式
+            document.querySelectorAll('.markdown-content pre code.language-latex, .markdown-content pre code.language-math, .markdown-content pre code.language-mathjax').forEach((block) => {
+                // 获取 LaTeX 代码内容
+                const latexContent = block.textContent;
+                
+                // 创建一个新的 div 元素，用于显示数学公式
+                const latexDiv = document.createElement('div');
+                latexDiv.className = 'editormd-tex';
+                latexDiv.style.margin = '20px 0';
+                latexDiv.style.textAlign = 'center';
+                
+                // 创建一个 span 元素，用于包裹 KaTeX 公式
+                const katexSpan = document.createElement('span');
+                katexSpan.className = 'katex';
+                katexSpan.style.fontSize = '1.6em';
+                
+                // 使用 KaTeX 渲染 LaTeX 公式
+                try {
+                    katex.render(latexContent, katexSpan, {
+                        throwOnError: false,
+                        displayMode: true,
+                        output: 'html'
+                    });
+                    
+                    // 将 span 元素添加到 div 中
+                    latexDiv.appendChild(katexSpan);
+                    
+                    // 替换原来的代码块
+                    block.parentElement.replaceChild(latexDiv, block);
+                } catch (error) {
+                    console.error('KaTeX rendering error:', error);
+                    // 如果渲染失败，显示原始代码
+                    latexDiv.textContent = 'LaTeX rendering failed: ' + error.message;
+                }
+            });
+            
+            // 高亮所有其他代码块
+            document.querySelectorAll('.markdown-content pre code:not(.language-flow):not(.language-flowchart):not(.language-latex):not(.language-math):not(.language-mathjax)').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+            
+            // 自动渲染页面中的所有 LaTeX 公式
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ],
+                throwOnError: false
+            });
+        }
+        
+        // 初始化代码高亮和处理各种代码块
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // 页面加载完成后，如果有内容需要渲染，就调用renderMarkdownContent
+            if (document.querySelector('.markdown-content')) {
+                renderMarkdownContent();
+            }
+        });
+    </script>
+</body>
+</html>

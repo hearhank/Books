@@ -1,0 +1,73 @@
+{% load pagination_tags %}
+
+<div class="module-header">
+    <h2>书籍列表</h2>
+    <button class="btn btn-create" data-module="books">创建书籍</button>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>标题</th>
+            <th>作者</th>
+            <th>发布状态</th>
+            <th>发布日期</th>
+            <th>文章数量</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books %}
+        <tr>
+            <td>{{ book.id }}</td>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author }}</td>
+            <td>
+                {% if book.is_published %}
+                <span class="status-indicator status-published">已发布</span>
+                {% else %}
+                <span class="status-indicator status-unpublished">未发布</span>
+                {% endif %}
+            </td>
+            <td>{{ book.pub_date|date:"Y-m-d H:i" }}</td>
+            <td>{{ book.articles.count }}</td>
+            <td>
+                <button class="btn btn-view" data-module="books" data-id="{{ book.id }}">查看</button>
+                <button class="btn btn-edit" data-module="books" data-id="{{ book.id }}">编辑</button>
+                {% if book.articles.count > 0 %}
+                <button class="btn btn-delete" data-module="books" data-id="{{ book.id }}" disabled>删除</button>
+                {% else %}
+                <button class="btn btn-delete" data-module="books" data-id="{{ book.id }}">删除</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 书籍分页控件 -->
+<div class="pagination-container">
+    <div class="pagination-info">
+        第 {{ books.number }}/{{ books.paginator.num_pages }} 页，共 {{ books.paginator.count }} 条记录
+    </div>
+    <div class="pagination-controls">
+        {% if books.has_previous %}
+        <a href="/admins/?module=books&page_books={{ books.previous_page_number }}" class="page-link">上一页</a>
+        {% endif %}
+        
+        {% smart_page_range books 7 as pages %}
+        {% for num in pages %}
+        {% if num is None %}
+        <span class="page-link">...</span>
+        {% elif books.number == num %}
+        <span class="page-link current">{{ num }}</span>
+        {% else %}
+        <a href="/admins/?module=books&page_books={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        
+        {% if books.has_next %}
+        <a href="/admins/?module=books&page_books={{ books.next_page_number }}" class="page-link">下一页</a>
+        {% endif %}
+    </div>
+</div>

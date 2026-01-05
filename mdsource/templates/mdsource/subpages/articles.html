@@ -1,0 +1,58 @@
+{% load pagination_tags %}
+
+<div class="module-header">
+    <h2>文章列表</h2>
+    <button class="btn btn-create" data-module="articles">创建文章</button>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>标题</th>
+            <th>所属书籍</th>
+            <th>发布日期</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for article in articles %}
+        <tr>
+            <td>{{ article.id }}</td>
+            <td>{{ article.title }}</td>
+            <td>{{ article.book.title }}</td>
+            <td>{{ article.pub_date|date:"Y-m-d H:i" }}</td>
+            <td>
+                <button class="btn btn-edit" data-module="articles" data-id="{{ article.id }}">编辑</button>
+                <button class="btn btn-delete" data-module="articles" data-id="{{ article.id }}">删除</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 文章分页控件 -->
+<div class="pagination-container">
+    <div class="pagination-info">
+        第 {{ articles.number }}/{{ articles.paginator.num_pages }} 页，共 {{ articles.paginator.count }} 条记录
+    </div>
+    <div class="pagination-controls">
+        {% if articles.has_previous %}
+        <a href="/admins/?module=articles&page_articles={{ articles.previous_page_number }}" class="page-link">上一页</a>
+        {% endif %}
+        
+        {% smart_page_range articles 7 as pages %}
+        {% for num in pages %}
+        {% if num is None %}
+        <span class="page-link">...</span>
+        {% elif articles.number == num %}
+        <span class="page-link current">{{ num }}</span>
+        {% else %}
+        <a href="/admins/?module=articles&page_articles={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        
+        {% if articles.has_next %}
+        <a href="/admins/?module=articles&page_articles={{ articles.next_page_number }}" class="page-link">下一页</a>
+        {% endif %}
+    </div>
+</div>

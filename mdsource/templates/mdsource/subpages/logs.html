@@ -1,0 +1,66 @@
+{% load pagination_tags %}
+
+<div class="module-header">
+    <h2>审计日志</h2>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>时间</th>
+            <th>用户</th>
+            <th>操作类型</th>
+            <th>状态</th>
+            <th>IP地址</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+            <td>{{ log.user.username }}</td>
+            <td>{{ log.get_action_type_display }}</td>
+            <td>
+                {% if log.status == 'success' %}
+                <span class="status-indicator status-published">成功</span>
+                {% else %}
+                <span class="status-indicator status-unpublished">失败</span>
+                {% endif %}
+            </td>
+            <td>{{ log.ip_address }}</td>
+            <td>
+                <button class="btn btn-view" data-module="logs" data-id="{{ log.id }}">查看详情</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 日志分页控件 -->
+<div class="pagination-container">
+    <div class="pagination-info">
+        第 {{ logs.number }}/{{ logs.paginator.num_pages }} 页，共 {{ logs.paginator.count }} 条记录
+    </div>
+    <div class="pagination-controls">
+        {% if logs.has_previous %}
+        <a href="/admins/?module=logs&page_logs={{ logs.previous_page_number }}" class="page-link">上一页</a>
+        {% endif %}
+        
+        {% smart_page_range logs 7 as pages %}
+        {% for num in pages %}
+        {% if num is None %}
+        <span class="page-link">...</span>
+        {% elif logs.number == num %}
+        <span class="page-link current">{{ num }}</span>
+        {% else %}
+        <a href="/admins/?module=logs&page_logs={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        
+        {% if logs.has_next %}
+        <a href="/admins/?module=logs&page_logs={{ logs.next_page_number }}" class="page-link">下一页</a>
+        {% endif %}
+    </div>
+</div>

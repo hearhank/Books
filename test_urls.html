@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>测试URL映射表</title>
+</head>
+<body>
+    <h1>测试URL映射表生成</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // 模拟Django模板生成的URL映射表
+        const articleUrls = {
+            {% for article in articles %}
+            {{ article.id }}: "{% url 'article_detail' article.id %}",
+            {% endfor %}
+        };
+        
+        // 显示URL映射表
+        const resultsDiv = document.getElementById('test-results');
+        resultsDiv.innerHTML = '<pre>' + JSON.stringify(articleUrls, null, 2) + '</pre>';
+        
+        // 测试获取URL
+        console.log('URL映射表:', articleUrls);
+        console.log('测试获取文章1的URL:', articleUrls[1]);
+    </script>
+</body>
+</html>

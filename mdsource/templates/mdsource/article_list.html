@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="{% static 'mdsource/css/style.css' %}">
+</head>
+<body>
+    <h1>文章列表</h1>
+    <p><a href="{% url 'article_create' %}">创建新文章</a></p>
+    <ul>
+        {% for article in articles %}
+        <li>
+            <h2><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a></h2>
+            <p>所属书籍: <a href="{% url 'book_detail' article.book.id %}">{{ article.book.title }}</a></p>
+            <p>发布日期: {{ article.pub_date }}</p>
+        </li>
+        {% empty %}
+        <li>暂无文章</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'index' %}">查看所有书籍</a>
+</body>
+</html>

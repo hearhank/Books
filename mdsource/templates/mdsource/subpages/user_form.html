@@ -1,0 +1,164 @@
+<div class="module-header">
+    <h2>{{ title }}</h2>
+</div>
+
+<!-- 错误消息显示 -->
+{% if error %}
+<div class="error-message">
+    <div class="error-icon">⚠️</div>
+    <div class="error-text">{{ error }}</div>
+</div>
+{% endif %}
+
+<form id="user-form" method="post" action="/admins/subpages/user-form/">
+    {% csrf_token %}
+    
+    <!-- 隐藏字段 -->
+    <input type="hidden" name="user_id" value="{{ user.id|default:'' }}">
+    
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="username">用户名 *</label>
+            <input type="text" id="username" name="username" value="{% if form_data.username %}{{ form_data.username }}{% elif user %}{{ user.username }}{% endif %}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">邮箱 *</label>
+            <input type="email" id="email" name="email" value="{% if form_data.email %}{{ form_data.email }}{% elif user %}{{ user.email }}{% endif %}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="first_name">姓</label>
+            <input type="text" id="first_name" name="first_name" value="{% if form_data.first_name %}{{ form_data.first_name }}{% elif user %}{{ user.first_name }}{% endif %}">
+        </div>
+        
+        <div class="form-group">
+            <label for="last_name">名</label>
+            <input type="text" id="last_name" name="last_name" value="{% if form_data.last_name %}{{ form_data.last_name }}{% elif user %}{{ user.last_name }}{% endif %}">
+        </div>
+        
+        {% if not user %}
+        <div class="form-group">
+            <label for="password1">密码 *</label>
+            <input type="password" id="password1" name="password1" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password2">确认密码 *</label>
+            <input type="password" id="password2" name="password2" required>
+        </div>
+        {% else %}
+        <div class="form-group">
+            <label for="password1">新密码（留空则不修改）</label>
+            <input type="password" id="password1" name="password1">
+        </div>
+        
+        <div class="form-group">
+            <label for="password2">确认新密码</label>
+            <input type="password" id="password2" name="password2">
+        </div>
+        {% endif %}
+        
+        {% if not user %}
+        <div class="form-group">
+            <label for="is_active">是否活跃</label>
+            <input type="checkbox" id="is_active" name="is_active" {% if form_data.is_active %} checked {% elif user and user.is_active %} checked {% else %} checked {% endif %}>
+        </div>
+        
+        <div class="form-group">
+            <label for="is_staff">是否为管理员</label>
+            <input type="checkbox" id="is_staff" name="is_staff" {% if form_data.is_staff %}checked{% elif user and user.is_staff %}checked{% endif %}>
+        </div>
+        
+        <div class="form-group">
+            <label for="is_superuser">是否为超级管理员</label>
+            <input type="checkbox" id="is_superuser" name="is_superuser" {% if form_data.is_superuser %}checked{% elif user and user.is_superuser %}checked{% endif %}>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">保存</button>
+        <button type="button" class="btn btn-cancel" id="btn-back">返回</button>
+    </div>
+</form>
+
+<style>
+    /* 表单样式 */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .form-group input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+    
+    .form-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 0.5rem;
+        grid-column: 1 / -1;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+    
+    /* 错误消息样式 */
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background-color: #fee;
+        border: 1px solid #fcc;
+        border-radius: 4px;
+        color: #c33;
+    }
+    
+    .error-icon {
+        font-size: 1.5rem;
+    }
+    
+    .error-text {
+        flex: 1;
+        font-weight: 500;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

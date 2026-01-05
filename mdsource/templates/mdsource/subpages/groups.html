@@ -1,0 +1,56 @@
+{% load pagination_tags %}
+
+<div class="module-header">
+    <h2>用户组列表</h2>
+    <button class="btn btn-create" data-module="groups">创建用户组</button>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>组名</th>
+            <th>用户数量</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.id }}</td>
+            <td>{{ group.name }}</td>
+            <td>{{ group.user_set.count }}</td>
+            <td>
+                <button class="btn btn-edit" data-module="groups" data-id="{{ group.id }}">编辑</button>
+                <button class="btn btn-delete" data-module="groups" data-id="{{ group.id }}">删除</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 用户组分页控件 -->
+<div class="pagination-container">
+    <div class="pagination-info">
+        第 {{ groups.number }}/{{ groups.paginator.num_pages }} 页，共 {{ groups.paginator.count }} 条记录
+    </div>
+    <div class="pagination-controls">
+        {% if groups.has_previous %}
+        <a href="/admins/?module=groups&page_groups={{ groups.previous_page_number }}" class="page-link">上一页</a>
+        {% endif %}
+        
+        {% smart_page_range groups 7 as pages %}
+        {% for num in pages %}
+        {% if num is None %}
+        <span class="page-link">...</span>
+        {% elif groups.number == num %}
+        <span class="page-link current">{{ num }}</span>
+        {% else %}
+        <a href="/admins/?module=groups&page_groups={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        
+        {% if groups.has_next %}
+        <a href="/admins/?module=groups&page_groups={{ groups.next_page_number }}" class="page-link">下一页</a>
+        {% endif %}
+    </div>
+</div>
