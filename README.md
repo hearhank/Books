@@ -345,16 +345,14 @@ A: 目前系统仅支持中文界面。如需多语言支持，需要进行国�
 
 ### 联系方式
 
-- **项目地址**：[GitHub仓库链接]
-- **问题反馈**：[Issue链接]
-- **邮件联系**：[support@example.com]
+
 
 ### 开发文档
 
 详细的开发文档请参考：
 - [Django官方文档](https://docs.djangoproject.com/)
 - [Markdown语法指南](https://www.markdownguide.org/)
-- [Mermaid流程图文档](https://mermaid-js.github.io/)
+- [Mermaid流程图文档](https://mermaid-js.github.io/) 暂不支持
 
 ---
 
@@ -366,9 +364,9 @@ A: 目前系统仅支持中文界面。如需多语言支持，需要进行国�
 
 ## 🙏 致谢
 
-感谢所有为本项目做出贡献的开发者和用户。
+
 
 ---
 
-**最后更新时间**：2025年1月
+**最后更新时间**：2026年1月
 **版本号**：v1.0.0
