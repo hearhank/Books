@@ -1,5 +1,6 @@
 from django import forms
 from django.utils import timezone
+from django.contrib.auth.forms import PasswordChangeForm as DjangoPasswordChangeForm
 from .models import Article, Book
 
 class ArticleForm(forms.ModelForm):
@@ -46,3 +47,26 @@ class BookForm(forms.ModelForm):
         # 创建模式下，设置默认发布时间为当前时间
         if not self.instance.pk:
             self.fields['pub_date'].initial = timezone.now()
+
+class PasswordChangeForm(DjangoPasswordChangeForm):
+    """自定义密码修改表单，取消密码复杂度验证"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 移除所有密码复杂度验证器
+        self.fields['new_password1'].validators = []
+        self.fields['new_password2'].validators = []
+    
+    def clean_new_password1(self):
+        """自定义新密码验证：只需要不少于6个非空字符"""
+        password1 = self.cleaned_data.get('new_password1')
+        
+        # 验证密码长度不少于6个字符
+        if len(password1) < 6:
+            raise forms.ValidationError('密码长度不能少于6个字符')
+        
+        # 验证密码不全是空格
+        if password1.strip() == '':
+            raise forms.ValidationError('密码不能全是空格')
+        
+        return password1

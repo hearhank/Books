@@ -86,20 +86,8 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+# 禁用Django默认的密码复杂度验证器，只使用表单中的自定义验证
+AUTH_PASSWORD_VALIDATORS = []
 
 
 # Internationalization
@@ -147,4 +135,4 @@ MDEDITOR_CONFIGS = {
         'sequence': True,  # 序列图支持
     }
 }
-
+

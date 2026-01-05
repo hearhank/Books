@@ -3,13 +3,12 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.core.paginator import Paginator
 from .models import Article, Book, PermissionAuditLog, SystemConfig
-from .forms import ArticleForm, BookForm
+from .forms import ArticleForm, BookForm, PasswordChangeForm
 from .permissions import (
     super_admin_required, staff_required, first_user_or_super_admin,
     log_permission_audit, get_client_ip, is_first_user
 )
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 
 def user_login(request):
